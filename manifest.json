@@ -1,12 +1,12 @@
 {
-  "name": "겸용 펌프 용량 계산서 — 간이스프링클러 + 옥내소화전",
-  "short_name": "겸용(간이+옥내)",
-  "description": "NFPC/NFTC 103A + NFTC 102 기준 겸용 펌프 용량 계산 전용 앱 — ENGINEER KIM MANMIN",
+  "name": "겸용 펌프 용량 계산서 — 옥내소화전 + 간이스프링클러",
+  "short_name": "겸용[옥내+간이]",
+  "description": "NFTC 102 + NFTC 103A 기준 겸용 펌프 용량 계산서 — ENGINEER KIM MANMIN",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#0f172a",
+  "background_color": "#eff6ff",
   "theme_color": "#7c3aed",
   "lang": "ko",
   "categories": ["utilities", "productivity"],
@@ -22,7 +22,7 @@
   ],
   "shortcuts": [
     {
-      "name": "새 겸용 계산서",
+      "name": "새 계산서 작성",
       "short_name": "새 계산서",
       "description": "겸용 펌프 용량 계산서를 새로 작성합니다",
       "url": "./index.html",
