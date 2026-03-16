@@ -241,6 +241,9 @@ input,select,button,td,th,div,span,p,h1,h2,label{font-family:'Noto Sans KR',sans
 /* ═══ 메인 래퍼 모바일 패딩 ═══ */
 .main-outer{max-width:1320px;margin:0 auto;padding:0 24px;}
 .main-inner{padding-top:20px;padding-bottom:40px;}
+@media(max-width:768px){
+  .g-res{grid-template-columns:1fr!important;}
+}
 @media(max-width:640px){
   .main-outer{padding:0 10px;}
   .main-inner{padding-top:14px;padding-bottom:80px;}
@@ -249,12 +252,15 @@ input,select,button,td,th,div,span,p,h1,h2,label{font-family:'Noto Sans KR',sans
   .hdr-right-hide{display:none!important;}
   .g-proj{grid-template-columns:1fr!important;}
   .g-res{grid-template-columns:1fr!important;}
+  .g-res-inner{grid-template-columns:1fr 1fr!important;}
   .g-4cp{grid-template-columns:repeat(2,1fr)!important;}
   .tab-bar-scroll{overflow-x:auto;white-space:nowrap;scrollbar-width:none;}
   .tab-bar-scroll::-webkit-scrollbar{display:none;}
 }
 @media(max-width:420px){
   .main-outer{padding:0 8px;}
+  .g-proj{grid-template-columns:1fr!important;}
+  .g-res-inner{grid-template-columns:1fr!important;}
   .g-4cp{grid-template-columns:1fr!important;}
 }
 </style>
@@ -882,7 +888,7 @@ function App(){
         {/* ════ TAB 0: 간이스프링클러 입력 ════ */}
         {tab===0&&<div className="no-print"><>
           <Box title="▣ 프로젝트 정보" color="#7f1d1d">
-            <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr",gap:14}}>
+            <div className="g-proj" style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr",gap:14}}>
               <div><LabelEl>공사명</LabelEl><input value={proj.name} onChange={e=>setProj(p=>({...p,name:e.target.value}))} style={{width:"100%",padding:"8px 12px",borderRadius:8,border:BD,fontSize:13,outline:"none"}}/></div>
               <div><LabelEl>설계자</LabelEl><input value={proj.designer} onChange={e=>setProj(p=>({...p,designer:e.target.value}))} style={{width:"100%",padding:"8px 12px",borderRadius:8,border:BD,fontSize:13,outline:"none"}}/></div>
               <div><LabelEl>작성일</LabelEl><input type="date" value={proj.date} onChange={e=>setProj(p=>({...p,date:e.target.value}))} style={{width:"100%",padding:"8px 12px",borderRadius:8,border:BD,fontSize:13,outline:"none"}}/></div>
@@ -976,11 +982,11 @@ function App(){
           </Box>
 
           {/* 각 설비 계산 결과 비교 */}
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:16}}>
+          <div className="g-res" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:16}}>
             {/* 간이스프링클러 결과 */}
             <div style={{background:"white",borderRadius:12,overflow:"hidden",boxShadow:"0 1px 4px rgba(0,0,0,0.08)"}}>
               <div style={{background:"#b45309",color:"white",padding:"10px 16px",fontWeight:700,fontSize:13}}>간이스프링클러 단독 계산 결과</div>
-              <div style={{padding:14,display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+              <div className="g-res-inner" style={{padding:14,display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
                 <Card label="기준 헤드 수 (A)" value={SP.A} unit="개" bc="amber"/>
                 <Card label="펌프 토출량" value={SP.Clpm} unit="ℓ/min" formula={`${SP.A}×${SP.q}`} bc="orange"/>
                 <Card label="실양정 (E)" value={ff(SP.E)} unit="m" bc="blue"/>
@@ -994,7 +1000,7 @@ function App(){
             {/* 옥내소화전 결과 */}
             <div style={{background:"white",borderRadius:12,overflow:"hidden",boxShadow:"0 1px 4px rgba(0,0,0,0.08)"}}>
               <div style={{background:"#b91c1c",color:"white",padding:"10px 16px",fontWeight:700,fontSize:13}}>옥내소화전 단독 계산 결과</div>
-              <div style={{padding:14,display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+              <div className="g-res-inner" style={{padding:14,display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
                 <Card label="소화전 수 (A)" value={H.A} unit="개" bc="red"/>
                 <Card label="펌프 토출량" value={H.Clpm} unit="ℓ/min" formula={`${H.A}×130`} bc="orange"/>
                 <Card label="실양정 (E)" value={ff(H.E)} unit="m" bc="blue"/>
@@ -1015,15 +1021,15 @@ function App(){
             </div>
 
             {/* 산출 근거 표시 */}
-            <div style={{background:"rgba(255,255,255,0.06)",borderRadius:10,padding:"12px 16px",marginBottom:14,fontSize:11,color:"#cbd5e1",lineHeight:2}}>
+            <div style={{background:"rgba(255,255,255,0.06)",borderRadius:10,padding:"12px 16px",marginBottom:14,fontSize:11,color:"#cbd5e1",lineHeight:2,wordBreak:"keep-all"}}>
               <b style={{color:"#93c5fd"}}>【 겸용 설계 기준 】</b><br/>
-              ◆ 토출량 = 간이스프링클러({SP.Clpm} ℓ/min) + 옥내소화전({H.Clpm} ℓ/min) = <b style={{color:"#fbbf24",fontSize:13}}>{CP.Clpm} ℓ/min</b><br/>
-              ◆ 전양정 = max(간이스프링클러 {SP.J}m, 옥내소화전 {H.J}m) = <b style={{color:"#fbbf24",fontSize:13}}>{CP.J} m</b> ({CP.hHead} 기준 채택)<br/>
-              ◆ 수원 = 간이스프링클러({f3(SP.D)} m³) + 옥내소화전({f3(H.D)} m³) = <b style={{color:"#fbbf24",fontSize:13}}>{f3(CP.D)} m³</b><br/>
-              ◆ 축동력 = 0.163 × {f3(CP.M)} m³/min × {CP.J} m × {CP.K} / {CP.N} = <b style={{color:"#fbbf24",fontSize:13}}>{f3(CP.Pkw)} kW</b>
+              ◆ 토출량 = 간이({SP.Clpm} ℓ/min) + 옥내({H.Clpm} ℓ/min) = <b style={{color:"#fbbf24",fontSize:13}}>{CP.Clpm} ℓ/min</b><br/>
+              ◆ 전양정 = max(간이 {SP.J}m, 옥내 {H.J}m) = <b style={{color:"#fbbf24",fontSize:13}}>{CP.J} m</b> ({CP.hHead} 채택)<br/>
+              ◆ 수원 = 간이({f3(SP.D)} m³) + 옥내({f3(H.D)} m³) = <b style={{color:"#fbbf24",fontSize:13}}>{f3(CP.D)} m³</b><br/>
+              ◆ 축동력 = 0.163 × {f3(CP.M)} × {CP.J} × {CP.K} / {CP.N} = <b style={{color:"#fbbf24",fontSize:13}}>{f3(CP.Pkw)} kW</b>
             </div>
 
-            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:14}}>
+            <div className="g-4cp" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:14}}>
               {[["합산 토출량 (Q)",`${CP.Clpm} ℓ/min`],["채택 전양정 (H)",`${CP.J} m`],
                 ["전동기 출력",`${CP.Php} HP`],["펌프 구경",`${cPump.pumpDia} A`],
                 ["합산 수원 (D)",`${f3(CP.D)} m³`],["펌프 효율 (η)",`${cPump.pumpEff} %`],
