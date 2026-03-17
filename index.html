@@ -47,7 +47,7 @@ input,select,button,td,th,div,span,p,h1,h2,label{font-family:'Noto Sans KR',sans
     size:A4 portrait;
     margin:14mm 12mm 22mm 14mm;
     @bottom-right{
-      content:"MANMIN-Ver2.0";
+      content:"MANMIN-Ver3.0";
       font-family:'Orbitron',sans-serif;
       font-size:8pt;
       font-weight:700;
@@ -304,9 +304,10 @@ const HOSE_TYPES={
   5:{label:"25mm 호스릴",       rate:0,  fixed:14},
 };
 const BASE_EASY_TYPES=[
-  {key:"A2", label:"일반형 — 2개 헤드 × 50 ℓ/min × 10분 (일반 용도)",                    n:2, q:50, t:10},
-  {key:"A5", label:"특수형 — 5개 헤드 × 50 ℓ/min × 20분 (영 별표4 제1호마목 2가 또는 6·8)", n:5, q:50, t:20},
-  {key:"AP", label:"주차장 — 표준반응형 1개 × 80 ℓ/min × 10분 (NFTC 103 준용)",           n:1, q:80, t:10},
+  {key:"A2",  label:"일반형 — 2개 헤드 × 50 ℓ/min × 10분 (일반 용도)",                    n:2, q:50, t:10},
+  {key:"A5",  label:"특수형 — 5개 헤드 × 50 ℓ/min × 20분 (영 별표4 제1호마목 2가 또는 6·8)", n:5, q:50, t:20},
+  {key:"AP2", label:"주차장(일반) — 표준반응형 2개 × 80 ℓ/min × 10분",                    n:2, q:80, t:10},
+  {key:"AP5", label:"주차장(특수) — 표준반응형 5개 × 80 ℓ/min × 20분",                    n:5, q:80, t:20},
 ];
 const TRANS_TYPE={1:{label:"전동기 직결",k:1.1},2:{label:"전동기 이외의 원동기",k:1.15}};
 const H_PIPE_SIZES=[40,50,65,80,100,125,150,200];
@@ -487,7 +488,8 @@ function FormulaModal({onClose}){
           <div className="fml-note">
             일반형: 2개 × 50 ℓ/min × 10분 = 1.000 m³<br/>
             특수형: 5개 × 50 ℓ/min × 20분 = 5.000 m³<br/>
-            주차장: 1개 × 80 ℓ/min × 10분 = 0.800 m³
+            주차장(일반): 2개 × 80 ℓ/min × 10분 = 1.600 m³<br/>
+            주차장(특수): 5개 × 80 ℓ/min × 20분 = 8.000 m³
           </div>
         </div>
       </div>
@@ -545,7 +547,7 @@ function FormulaModal({onClose}){
           <div className="fml-card-title">A × 방사량 × 방사시간</div>
           <code className="fml-eq">수원(m³) = N개 × 130 ℓ/min × 20분ₙ ÷ 1,000</code>
           <div className="fml-note">
-            최대 5개 동시 사용 기준 | 개당 방사량 130 ℓ/min (§2.2.1.3) 고정<br/>
+            최대 2개 동시 사용 기준 | 개당 방사량 130 ℓ/min (§2.2.1.3) 고정<br/>
             방사시간 20분 (§2.1.1.4)
           </div>
         </div>
@@ -776,7 +778,7 @@ function App(){
 
   /* ── 옥내소화전 계산 ── */
   const H=useMemo(()=>{
-    const A=Math.min(5,Math.max(1,hSys.hydrants|0));
+    const A=Math.min(2,Math.max(1,hSys.hydrants|0));
     const Clpm=A*FLOW_PER_HYDRANT;
     const D=Clpm*H_WATER_TIME/1000;
     let F=0;
@@ -835,7 +837,7 @@ function App(){
             <div style={{fontSize:12,marginTop:8,opacity:0.85,letterSpacing:"0.02em"}}>
               간이스프링클러설비(NFPC/NFTC 103A) + 옥내소화전(NFPC/NFTC 102) 겸용 &nbsp;
               <span style={{fontFamily:"'Orbitron',sans-serif",fontWeight:900,fontSize:12,color:"#93c5fd",letterSpacing:"0.08em",textShadow:"0 0 8px rgba(147,197,253,0.6)"}}>
-                MANMIN · Ver-2.0
+                MANMIN · Ver3.0
               </span>
             </div>
           </div>
@@ -916,7 +918,7 @@ function App(){
             velLabel="⚠️ 유속 제한 (NFTC 103A §2.5.3.3): 가지배관 ≤ 6 m/s | 그 밖의 배관 ≤ 10 m/s — 초과 시 ⚡ 표시"
             label="Ⅰ-2. 간이스프링클러 배관 구간 데이터 입력"/>
           <div style={{textAlign:"right",fontFamily:"'Orbitron',sans-serif",fontSize:10,fontWeight:700,color:"#94a3b8",letterSpacing:"0.08em",paddingRight:4}}>
-            MANMIN · Ver-2.0
+            MANMIN · Ver3.0
           </div>
         </></div>}
 
@@ -924,7 +926,7 @@ function App(){
         {tab===1&&<div className="no-print"><>
           <Box title="Ⅱ. 옥내소화전 시스템 파라미터 (NFTC 102)" color="#b91c1c">
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:14}}>
-              <div><LabelEl>A. 최대구역 소화전 수</LabelEl><InpNum val={hSys.hydrants} min={1} max={5} onChange={v=>ssH("hydrants",v)} unit="개 (최대 5)"/></div>
+              <div><LabelEl>A. 최대구역 소화전 수</LabelEl><InpNum val={hSys.hydrants} min={1} max={2} onChange={v=>ssH("hydrants",v)} unit="개 (최대 2)"/></div>
               <div><LabelEl>F. 실양정 (h₁)</LabelEl><InpNum val={hSys.actualHead} onChange={v=>ssH("actualHead",v)} unit="m"/></div>
               <div><LabelEl>G. 호스 길이</LabelEl>
                 <Sel val={hSys.hoseLen} onChange={v=>ssH("hoseLen",parseInt(v))}>
@@ -952,7 +954,7 @@ function App(){
             velLabel="⚠️ 유속 제한 (NFTC 102 §2.3.5): 펌프 토출 측 주배관 ≤ 4 m/s — 초과 시 ⚡ 표시"
             label="Ⅱ-2. 옥내소화전 배관 구간 데이터 입력"/>
           <div style={{textAlign:"right",fontFamily:"'Orbitron',sans-serif",fontSize:10,fontWeight:700,color:"#94a3b8",letterSpacing:"0.08em",paddingRight:4}}>
-            MANMIN · Ver-2.0
+            MANMIN · Ver3.0
           </div>
         </></div>}
 
@@ -1046,7 +1048,7 @@ function App(){
             </div>
           </div>
           <div style={{textAlign:"right",fontFamily:"'Orbitron',sans-serif",fontSize:10,fontWeight:700,color:"#94a3b8",letterSpacing:"0.08em",marginTop:8,paddingRight:4}}>
-            MANMIN · Ver-2.0
+            MANMIN · Ver3.0
           </div>
         </></div>}
 
@@ -1131,7 +1133,7 @@ function App(){
                   </tr></thead>
                   <tbody>
                     {[
-                      ["A","최대구역 소화전 수",H.A,"개",`최대 5개 이하 — ${H.A}개 적용`],
+                      ["A","최대구역 소화전 수",H.A,"개",`최대 2개 이하 — ${H.A}개 적용`],
                       ["B","소화전 개당 방사량",FLOW_PER_HYDRANT,"ℓ/min","NFTC 102 §2.2.1.3 (130 ℓ/min 고정)"],
                       ["C","펌프 토출량",H.Clpm,"ℓ/min",`C = A×B = ${H.A}×${FLOW_PER_HYDRANT}`],
                       ["D","수원 용량",`${f3(H.D)}`,"m³",`D = ${H.A}×130×20÷1000 = ${f3(H.D)} m³`],
@@ -1293,7 +1295,7 @@ function App(){
               ④ 배관 마찰손실: Hazen-Williams 공식 적용
             </div>
 
-            <div id="dev-stamp" style={{fontFamily:"'Orbitron',sans-serif",fontWeight:700,letterSpacing:"0.08em"}}>MANMIN · Ver-2.0</div>
+            <div id="dev-stamp" style={{fontFamily:"'Orbitron',sans-serif",fontWeight:700,letterSpacing:"0.08em"}}>MANMIN · Ver3.0</div>
           </div>{/* /report-zone */}
           </div>{/* /rpt-inner */}
           </div>{/* /rpt-outer */}
