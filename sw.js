@@ -1,10 +1,10 @@
 /* ═══════════════════════════════════════════════════════════════
    Service Worker — 겸용 펌프 용량 계산서 (옥내소화전 + 간이스프링클러)
-   Developer MANMIN · Ver-3.3
+   Developer MANMIN · Ver-5.0
 ═══════════════════════════════════════════════════════════════ */
 
-const CACHE_NAME   = 'manmin-ganji-indoor-v3.4';
-const STATIC_CACHE = 'manmin-ganji-indoor-static-v3.4';
+const CACHE_NAME   = 'manmin-ganji-indoor-v5.0';
+const STATIC_CACHE = 'manmin-ganji-indoor-static-v5.0';
 
 const PRECACHE_URLS = [
   './',
@@ -23,7 +23,7 @@ const PRECACHE_URLS = [
 
 /* ── INSTALL ── */
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing ganji-indoor-v3.4...');
+  console.log('[SW] Installing ganji-indoor-v5.0...');
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then((cache) => cache.addAll(PRECACHE_URLS).catch((e) => console.warn('[SW] Pre-cache 일부 실패:', e)))
