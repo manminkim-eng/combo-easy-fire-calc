@@ -37,9 +37,11 @@ def py(sp,ss,h,hs,c,cs,bf):
     mx=c['mode']=='max'; Q=max(sQ,hQ) if mx else sQ+hQ; D=max(sD,hD) if mx else sD+hD
     R=0 if c['roofEx'] else hD/3; Dt=D+R          # 옥상수조는 옥내소화전 유효수량에만(NFTC 102 2.1.2)
     J=max(sJ,hJ); P=0.163*(Q/1000)*J*K[c['transType']]/(c['pumpEff']/100); hp=P*1.341; Php=next((x for x in HP if x>=hp), math.ceil(hp/5)*5)
-    S=J*MPA; ok=S<1.2 or all(x=='SCH40' for x in (h['pipeType'],sp['pipeType'],c['pipeType']))
+    # v6.1.3 — 배관 사용압력 = 체절압력(입력, 없으면 정격 × 1.4 — 소방청 법령해석 412390 · NFPC 102 제5조①7호 · NFPC 103A 제5조②5호)
+    Pd=J*MPA; sh=c.get('shutPress',0) or 0; S=sh if sh>0 else Pd*1.4
+    ok=S<1.2 or all(x=='SCH40' for x in (h['pipeType'],sp['pipeType'],c['pipeType']))
     Th=(J-h['lowHead']-hG)*MPA
-    return dict(Fc=Fc,sJ=sJ,hJ=hJ,sD=sD,hD=hD,Q=Q,D=D,Dt=Dt,J=J,Pkw=P,Php=Php,S=S,ok=ok,prv=Th>0.7,vo=v1+v2+v3,hi=bf>1)
+    return dict(Fc=Fc,sJ=sJ,hJ=hJ,sD=sD,hD=hD,Q=Q,D=D,Dt=Dt,J=J,Pkw=P,Php=Php,Pd=Pd,S=S,ok=ok,prv=Th>0.7,vo=v1+v2+v3,hi=bf>1)
 random.seed(20261016); cases=[]
 def segs(fl,sizes,kind=False):
     return [dict(**({'kind':random.choice(['br','oth'])} if kind else {}),flow=random.choice(fl),dia=random.choice(sizes),len=round(random.uniform(0,80),1),**{k:random.randint(0,6) for k in FK}) for _ in range(random.randint(1,4))]
@@ -47,12 +49,12 @@ for _ in range(N):
     bf=random.randint(1,3); P=list(INNER)
     sp=dict(baseType=random.choice(list(BASE)),actualHead=round(random.uniform(3,120),1),pipeType=random.choice(P))
     h=dict(hydrants=random.randint(1,7),actualHead=round(random.uniform(5,150),1),hoseLen=random.choice([15,30]),hoseType=random.randint(1,5),pipeType=random.choice(P),lowHead=round(random.uniform(-10,30),1))
-    c=dict(pumpDia=100,pumpEff=random.randint(10,80),transType=random.randint(1,2),mode=random.choice(['sum','max']),roofEx=random.randint(0,1),pipeType=random.choice(P))
+    c=dict(pumpDia=100,pumpEff=random.randint(10,80),transType=random.randint(1,2),mode=random.choice(['sum','max']),roofEx=random.randint(0,1),pipeType=random.choice(P),shutPress=random.choice([0,0,round(random.uniform(0.3,2.0),2)]))
     cases.append((sp,segs([50*k for k in range(1,11)],list(FIT),True),h,segs([130*k for k in range(1,6)],[40,50,65,80,100,125,150,200]),c,segs([10*k for k in range(10,120)],[50,65,80,100,125,150,200]),bf))
 tf=os.path.join(tempfile.gettempdir(),'_cis_cases.json'); json.dump(cases,open(tf,'w'))
 js=os.path.join(tempfile.gettempdir(),'_cis_run.js')
 open(js,'w',encoding='utf-8').write("var window=globalThis;\n"+eng+"\nconst cs=require(process.argv[2]);process.stdout.write(JSON.stringify(cs.map(a=>{const x=cisCalc(...a);"
- "return {Fc:x.Fc,sJ:x.SP.J,hJ:x.H.J,sD:x.SP.D,hD:x.H.D,Q:x.C.Clpm,D:x.C.D,Dt:x.C.Dt,J:x.C.J,Pkw:x.C.Pkw,Php:x.C.Php,S:x.C.Pdis,ok:x.C.pipePressOK,prv:x.H.needPRV,vo:x.C.velOverN,hi:x.C.hiRise}})));")
+ "return {Fc:x.Fc,sJ:x.SP.J,hJ:x.H.J,sD:x.SP.D,hD:x.H.D,Q:x.C.Clpm,D:x.C.D,Dt:x.C.Dt,J:x.C.J,Pkw:x.C.Pkw,Php:x.C.Php,Pd:x.C.Pdis,S:x.C.Pshut,ok:x.C.pipePressOK,prv:x.H.needPRV,vo:x.C.velOverN,hi:x.C.hiRise}})));")
 E=json.loads(subprocess.check_output(['node','--max-old-space-size=4096',js,tf])); bad=[]
 for i,(cs,e) in enumerate(zip(cases,E)):
     p=py(*cs)
